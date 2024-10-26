@@ -24,7 +24,6 @@
     </style>
 </head>
 <body>
-    <!-- <h2 id="user-info">Welcome, <span id="username"></span> (Email: <span id="emails"></span>)</h2> -->
     <h2 id="user-info">Welcome, <span id="username"></span> (Email: <span id="emails"></span>)</h2>
 
     <div id="main-page">
@@ -62,6 +61,24 @@
     </div>
 
     <script>
+        window.onload = async function() {
+            try {
+                const response = await fetch('/session-user');
+                const user = await response.json();
+
+                if (user) {
+                    document.getElementById('username').textContent = user.username;
+                    document.getElementById('emails').textContent = user.email;
+                } else {
+                    // Redirect to login if no user is found
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                window.location.href = '/login'; // Redirect to login on error
+            }
+        };
+
         // Open the form modal
         document.getElementById('request-leave-btn').onclick = function() {
             document.getElementById('main-page').style.display = 'none';
