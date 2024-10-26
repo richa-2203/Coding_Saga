@@ -44,17 +44,17 @@ app.get('/session-user', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-    const { email, password } = req.body;
+    const { rollNumber, password } = req.body; // Changed email to rollNumber
     
     // Load users from the JSON file
     const users = loadUsers();
     
-    // Find user with matching email and password
-    const user = users.find(user => user.email === email && user.password === password);
+    // Find user with matching roll number and password
+    const user = users.find(user => user.rollNumber === rollNumber && user.password === password); // Updated search condition
     
     if (user) {
         // Set user data in session
-        req.session.user = { username: user.username, email: user.email };
+        req.session.user = { username: user.username, rollNumber: user.rollNumber }; // Changed email to rollNumber
 
         switch (user.role) {
             case 'student':
