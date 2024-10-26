@@ -17,6 +17,10 @@
                 <th>ROLLNO</th>
                 <th>Name</th>
                 <th>Branch</th>
+                <th>Date of Leave</th>
+                <th>Date of Return</th>
+                <th>Creation Date</th> <!-- New column for Creation Date -->
+                <th>Actions</th> <!-- Column for approve/decline actions -->
             </tr>
         </thead>
         <tbody id="dataTableBody">
@@ -43,39 +47,41 @@
         function displayData(data) {
             const tableBody = document.getElementById('dataTableBody');
             tableBody.innerHTML = ''; // Clear previous entries
-
+        
             const pendingRequests = data.filter(item => item.status === 'Pending');
-
-            // Populate the table with filtered data
+        
             if (pendingRequests.length === 0) {
                 const messageRow = document.createElement('tr');
                 messageRow.innerHTML = `
-                                    <td colspan="4" style="text-align: center;">No requests pending.</td>
+                    <td colspan="5" style="text-align: center;">No requests pending.</td>
                 `;
                 tableBody.appendChild(messageRow);
             } else {
-                // Populate the table with filtered data
                 pendingRequests.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${item.rollNumber}</td>
                         <td>${item.name}</td>
                         <td>${item.branch}</td>
+                        <td>${item.dateOfLeave}</td>
+                        <td>${item.dateOfReturn}</td>
+                        <td>${new Date(item.createdAt).toLocaleString()}</td> <!-- Format the date -->
                         <td>
-                            <button onclick="updateStatus('${item.rollNumber}', 'Approved')">Approve</button>
-                            <button onclick="updateStatus('${item.rollNumber}', 'Declined')">Decline</button>
+                            <button onclick="updateStatus('${item.rollNumber}', '${item.createdAt}', 'Approved')">Approve</button>
+                            <button onclick="updateStatus('${item.rollNumber}', '${item.createdAt}', 'Declined')">Decline</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
                 });
             }
         }
-        async function updateStatus(rollNumber, newStatus) {
+        
+        async function updateStatus(rollNumber, createdAt, newStatus) {
             try {
                 const response = await fetch('http://localhost:3000/api/update-status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ rollNumber, status: newStatus }),
+                    body: JSON.stringify({ rollNumber, createdAt, status: newStatus }), // Include createdAt
                 });
 
                 if (!response.ok) {
