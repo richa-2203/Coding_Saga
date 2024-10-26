@@ -84,6 +84,20 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Route to get leave requests by roll number
+app.get('/api/leave-requests/:rollNumber', (req, res) => {
+    const { rollNumber } = req.params;
+
+    // Load existing leave requests
+    const requests = loadLeaveRequests();
+
+    // Filter requests by roll number
+    const filteredRequests = requests.filter(request => request.rollNumber === rollNumber);
+
+    res.json(filteredRequests);
+});
+
+
 // API to create a leave request and save to JSON file
 app.post('/api/leave-requests', (req, res) => {
     const { name, branch, rollNumber, phoneNumber, email, dateOfLeave, dateOfReturn } = req.body;
