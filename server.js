@@ -141,6 +141,54 @@ const saveLeaveRequests = (requests) => {
         console.error('Error writing to leaveRequests.json:', error);
     }
 };
+app.get('/api/leaveRequests', (req, res) => {
+    const filePath = path.join(__dirname, 'leaveRequests.json');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error reading file' });
+        }
+        res.status(200).json(JSON.parse(data));
+    });
+});
+
+const leaveRequestsFilePath = path.join(__dirname, 'leaveRequests.json');
+
+// Endpoint to update the status of a leave request
+app.post('/api/update-status', (req, res) => {
+    const { rollNumber, status } = req.body;
+
+    // Read the leave requests from the JSON file
+    fs.readFile(leaveRequestsFilePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error reading data file' });
+        }
+
+        let leaveRequests;
+        try {
+            leaveRequests = JSON.parse(data); // Parse the JSON data
+        } catch (parseError) {
+            return res.status(500).json({ message: 'Error parsing data file' });
+        }
+
+        // Find the leave request by roll number
+        const request = leaveRequests.find(r => r.rollNumber === rollNumber);
+        if (request) {
+            request.status = status; // Update the status
+
+            // Write the updated leave requests back to the JSON file
+            fs.writeFile(leaveRequestsFilePath, JSON.stringify(leaveRequests, null, 2), (writeErr) => {
+                if (writeErr) {
+                    return res.status(500).json({ message: 'Error saving data file' });
+                }
+
+                res.status(200).json({ message: `Status updated to ${status} successfully!` });
+            });
+        } else {
+            res.status(404).json({ message: 'Request not found' });
+        }
+    });
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
