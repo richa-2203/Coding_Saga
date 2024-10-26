@@ -1,199 +1,104 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
-const fs = require('fs'); // File system module for JSON handling
-const session = require('express-session'); // Import express-session
-
-const app = express();
-
-// Configure session middleware
-app.use(session({
-    secret: 'your-secret-key', // Replace with a strong secret key
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false } // Set to true if using HTTPS
-}));
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json()); // Handle JSON data
-
-// Load users from JSON file
-const loadUsers = () => {
-    try {
-        const data = fs.readFileSync('users.json', 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error reading users.json:', error);
-        return []; // Return an empty array if the file read fails
-    }
-};
-
-// Routes
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-// Get user session data
-app.get('/session-user', (req, res) => {
-    if (req.session.user) {
-        res.json(req.session.user);
-    } else {
-        res.json(null); // No user found
-    }
-});
-
-app.post('/login', (req, res) => {
-    const { rollNumber, password } = req.body; // Changed email to rollNumber
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-container">
+        <h2>Welcome to the Admin Page</h2>
+        <h1>Pending Requests</h1>
+    </div>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>ROLLNO</th>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>Date of Leave</th>
+                <th>Date of Return</th>
+                <th>Creation Date</th> <!-- New column for Creation Date -->
+                <th>Actions</th> <!-- Column for approve/decline actions -->
+            </tr>
+        </thead>
+        <tbody id="dataTableBody">
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
     
-    // Load users from the JSON file
-    const users = loadUsers();
-    
-    // Find user with matching roll number and password
-    const user = users.find(user => user.rollNumber === rollNumber && user.password === password); // Updated search condition
-    
-    if (user) {
-        // Set user data in session
-        req.session.user = { username: user.username, rollNumber: user.rollNumber }; // Changed email to rollNumber
 
-        switch (user.role) {
-            case 'student':
-                return res.redirect('/student');
-            case 'security':
-                return res.redirect('/security');
-            case 'admin':
-                return res.redirect('/admin');
-            default:
-                return res.redirect('/');
-        }
-    } else {
-        res.redirect('/?error=invalid');
-    }
-});
-
-//Route for each role page
-app.get('/student', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'student.html'));
-});
-
-app.get('/security', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'security.html'));
-});
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Route to get leave requests by roll number
-app.get('/api/leave-requests/:rollNumber', (req, res) => {
-    const { rollNumber } = req.params;
-
-    // Load existing leave requests
-    const requests = loadLeaveRequests();
-
-    // Filter requests by roll number
-    const filteredRequests = requests.filter(request => request.rollNumber === rollNumber);
-
-    res.json(filteredRequests);
-});
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html')); // Adjust this path to where your login.html is located
-});
-
-// API to create a leave request and save to JSON file
-app.post('/api/leave-requests', (req, res) => {
-    const { name, branch, rollNumber, phoneNumber, email, dateOfLeave, dateOfReturn } = req.body;
-
-    const newLeaveRequest = {
-        name,
-        branch,
-        rollNumber,
-        phoneNumber,
-        email,
-        dateOfLeave,
-        dateOfReturn,
-        createdAt: new Date(), // Timestamp the request creation
-        status: 'Pending' // Default status
-    };
-
-    // Load existing requests, add new request, and save back to JSON file
-    const requests = loadLeaveRequests();
-    requests.push(newLeaveRequest);
-    saveLeaveRequests(requests);
-
-    res.status(201).json({ message: 'Leave request submitted successfully.', leaveRequest: newLeaveRequest });
-});
-
-// Helper functions to load and save leave requests
-const loadLeaveRequests = () => {
-    try {
-        const data = fs.readFileSync('leaveRequests.json', 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Error reading leaveRequests.json:', error);
-        return []; // Return empty array if file read fails
-    }
-};
-
-app.get('/api/leaveRequests', (req, res) => {
-    const filePath = path.join(__dirname, 'leaveRequests.json');
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error reading file' });
-        }
-        res.status(200).json(JSON.parse(data));
-    });
-});
-
-const leaveRequestsFilePath = path.join(__dirname, 'leaveRequests.json');
-
-// Endpoint to update the status of a leave request
-app.post('/api/update-status', (req, res) => {
-    const { rollNumber, status } = req.body;
-
-    // Read the leave requests from the JSON file
-    fs.readFile(leaveRequestsFilePath, 'utf8', (err, data) => {
-        if (err) {
-            return res.status(500).json({ message: 'Error reading data file' });
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('http://localhost:3000/api/leaveRequests'); // Fetch data from the server
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log(data); 
+                displayData(data); // Call function to display data
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
 
-        let leaveRequests;
-        try {
-            leaveRequests = JSON.parse(data); // Parse the JSON data
-        } catch (parseError) {
-            return res.status(500).json({ message: 'Error parsing data file' });
+        function displayData(data) {
+            const tableBody = document.getElementById('dataTableBody');
+            tableBody.innerHTML = ''; // Clear previous entries
+        
+            const pendingRequests = data.filter(item => item.status === 'Pending');
+        
+            if (pendingRequests.length === 0) {
+                const messageRow = document.createElement('tr');
+                messageRow.innerHTML = `
+                    <td colspan="5" style="text-align: center;">No requests pending.</td>
+                `;
+                tableBody.appendChild(messageRow);
+            } else {
+                pendingRequests.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.rollNumber}</td>
+                        <td>${item.name}</td>
+                        <td>${item.branch}</td>
+                         <td>${item.dateOfLeave}</td>
+                        <td>${item.dateOfReturn}</td>
+                        <td>${new Date(item.createdAt).toLocaleString()}</td> <!-- Format the date -->
+                        <td>
+                            <button onclick="updateStatus('${item.rollNumber}', 'Approved')">Approve</button>
+                            <button onclick="updateStatus('${item.rollNumber}', 'Declined')">Decline</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
         }
+        
+        async function updateStatus(rollNumber, newStatus) {
+            try {
+                const response = await fetch('http://localhost:3000/api/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rollNumber, status: newStatus }),
+                });
 
-        // Find the leave request by roll number
-        const request = leaveRequests.find(r => r.rollNumber === rollNumber);
-        if (request) {
-            request.status = status; // Update the status
-
-            // Write the updated leave requests back to the JSON file
-            fs.writeFile(leaveRequestsFilePath, JSON.stringify(leaveRequests, null, 2), (writeErr) => {
-                if (writeErr) {
-                    return res.status(500).json({ message: 'Error saving data file' });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
 
-                res.status(200).json({ message: `Status updated to ${status} successfully!` });
-            });
-        } else {
-            res.status(404).json({ message: 'Request not found' });
+                const result = await response.json();
+                alert(result.message); // Display a success message
+                fetchData(); // Refresh the table after the update
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Error updating status: ' + error.message);
+            }
         }
-    });
-});
-
-
-const saveLeaveRequests = (requests) => {
-    try {
-        fs.writeFileSync('leaveRequests.json', JSON.stringify(requests, null, 2), 'utf8');
-        console.log('leaveRequests.json updated successfully.');
-    } catch (error) {
-        console.error('Error writing to leaveRequests.json:', error);
-    }
-};
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+    fetchData(); // Call fetchData on page load
+    </script>
+        <a href="/">Logout</a>
+   
+</body>
+</html>
