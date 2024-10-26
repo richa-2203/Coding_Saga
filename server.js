@@ -155,8 +155,9 @@ app.get('/api/leaveRequests', (req, res) => {
 const leaveRequestsFilePath = path.join(__dirname, 'leaveRequests.json');
 
 // Endpoint to update the status of a leave request
+// Endpoint to update the status of a leave request
 app.post('/api/update-status', (req, res) => {
-    const { rollNumber, status } = req.body;
+    const { rollNumber, createdAt, status } = req.body; // Now includes createdAt
 
     // Read the leave requests from the JSON file
     fs.readFile(leaveRequestsFilePath, 'utf8', (err, data) => {
@@ -171,8 +172,9 @@ app.post('/api/update-status', (req, res) => {
             return res.status(500).json({ message: 'Error parsing data file' });
         }
 
-        // Find the leave request by roll number
-        const request = leaveRequests.find(r => r.rollNumber === rollNumber);
+        // Find the leave request by roll number and createdAt
+        const request = leaveRequests.find(r => r.rollNumber === rollNumber && new Date(r.createdAt).getTime() === new Date(createdAt).getTime());
+
         if (request) {
             request.status = status; // Update the status
 
@@ -189,7 +191,6 @@ app.post('/api/update-status', (req, res) => {
         }
     });
 });
-
 
 const saveLeaveRequests = (requests) => {
     try {
