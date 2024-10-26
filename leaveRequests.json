@@ -1,0 +1,68 @@
+[
+  {
+    "name": "richa",
+    "branch": "cse",
+    "rollNumber": "cs23bt020",
+    "phoneNumber": "111",
+    "email": "cs23bt020@iitdh.ac.in",
+    "dateOfLeave": "2024-10-26",
+    "dateOfReturn": "2024-10-21",
+    "createdAt": "2024-10-26T10:01:23.331Z",
+    "status": "Pending"
+  },
+  {
+    "name": "richa",
+    "branch": "cse",
+    "rollNumber": "cs23bt020",
+    "phoneNumber": "11111",
+    "email": "richageetharaj@gmail.com",
+    "dateOfLeave": "2024-10-29",
+    "dateOfReturn": "2024-11-09",
+    "createdAt": "2024-10-26T10:21:47.868Z",
+    "status": "Pending"
+  },
+  {
+    "name": "richa",
+    "branch": "cse",
+    "rollNumber": "cs23bt020",
+    "phoneNumber": "1111",
+    "email": "cs23bt020@iitdh.ac.in",
+    "dateOfLeave": "2024-10-25",
+    "dateOfReturn": "2024-10-30",
+    "createdAt": "2024-10-26T10:43:30.802Z",
+    "status": "Pending"
+  },
+  {
+    "name": "richa",
+    "branch": "sss",
+    "rollNumber": "sss",
+    "phoneNumber": "11111",
+    "email": "admin@iitdh.ac.in",
+    "dateOfLeave": "2024-10-26",
+    "dateOfReturn": "2024-10-30",
+    "createdAt": "2024-10-26T11:05:29.655Z",
+    "status": "Pending"
+  },
+  {
+    "name": "richa",
+    "branch": "cse",
+    "rollNumber": "345",
+    "phoneNumber": "788",
+    "email": "security@iitdh.ac.in",
+    "dateOfLeave": "2024-10-09",
+    "dateOfReturn": "2024-11-02",
+    "createdAt": "2024-10-26T11:10:42.747Z",
+    "status": "Pending"
+  },
+  {
+    "name": "rr",
+    "branch": "ww",
+    "rollNumber": "www",
+    "phoneNumber": "222",
+    "email": "2222",
+    "dateOfLeave": "2024-11-02",
+    "dateOfReturn": "2024-10-16",
+    "createdAt": "2024-10-26T11:35:21.767Z",
+    "status": "Pending"
+  }
+]

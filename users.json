@@ -1,0 +1,20 @@
+[
+    {
+        "email": "cs23bt020@iitdh.ac.in",
+        "password": "123",
+        "role": "student",
+        "username": "richa"
+    },
+    {
+        "email": "admin@iitdh.ac.in",
+        "password": "admin",
+        "role": "admin",
+        "username": "AdminUser"
+    },
+    {
+        "email": "security@iitdh.ac.in",
+        "password": "security",
+        "role": "security",
+        "username": "SecurityUser"
+    }
+]
