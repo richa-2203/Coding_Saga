@@ -2,7 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs'); // File system module for JSON handling
+const session = require('express-session'); // Import express-session
+
 const app = express();
+
+// Configure session middleware
+app.use(session({
+    secret: 'your-secret-key', // Replace with a strong secret key
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Set to true if using HTTPS
+}));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -24,6 +34,15 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
+// Get user session data
+app.get('/session-user', (req, res) => {
+    if (req.session.user) {
+        res.json(req.session.user);
+    } else {
+        res.json(null); // No user found
+    }
+});
+
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
     
@@ -34,6 +53,9 @@ app.post('/login', (req, res) => {
     const user = users.find(user => user.email === email && user.password === password);
     
     if (user) {
+        // Set user data in session
+        req.session.user = { username: user.username, email: user.email };
+
         switch (user.role) {
             case 'student':
                 return res.redirect('/student');
@@ -49,7 +71,7 @@ app.post('/login', (req, res) => {
     }
 });
 
-// Route for each role page
+//Route for each role page
 app.get('/student', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'student.html'));
 });
