@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="https://docs.opencv.org/4.x/opencv.js" async></script>
+    <style>
+        video {
+            width: 320px;  /* Set desired video size */
+            height: auto;
+        }
+        canvas {
+            display: none; /* Hide the canvas */
+        }
+    </style>
+</head>
+<body>
+    <h1>QR Code Scanner</h1>
+    <video id="video" autoplay></video>
+    <canvas id="canvas"></canvas>
+    <div id="qrText" style="margin-top: 20px; font-size: 1.2em; color: blue;"></div> <!-- Display QR code text here -->
+    
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let context = canvas.getContext('2d');
+        let qrText = document.getElementById('qrText');
+
+        async function startCamera() {
+            try {
+                let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.play();
+            } catch (error) {
+                console.error("Error accessing the camera:", error);
+                alert("Could not access the camera. Please check your permissions.");
+            }
+        }
+
+        function scanQRCode() {
+            // Capture the frame from the video
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+            let src = cv.matFromImageData(imgData);
+            let dst = new cv.Mat();
+
+            cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+            let qrCodeDetector = new cv.QRCodeDetector();
+            let points = new cv.Mat();
+            let decodedText = qrCodeDetector.detectAndDecode(dst, points);
+
+            if (decodedText) {
+                qrText.innerText = `QR Code detected: ${decodedText}`; // Display decoded text
+                console.log("QR Code detected:", decodedText); // Log decoded text
+            } else {
+                console.log("No QR code detected in this frame."); 
+            }
+
+            src.delete();
+            dst.delete();
+            points.delete();
+        }
+
+        async function main() {
+            await startCamera();
+            video.addEventListener('loadedmetadata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            });
+
+            setInterval(scanQRCode, 1000); // Scan every second
+        }
+
+        main();
+    </script>
+</body>
+</html>
+
+
+
