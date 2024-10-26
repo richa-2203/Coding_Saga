@@ -3,14 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Page</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Student Portal</title>
+    <style>
+        /* Basic styling for the modal */
+        #leave-request-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 1000;
+        }
+        #main-page {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
-    <div class="page-container">
-        <h2>Welcome to the Student Page</h2>
-        <p>This page is for students only.</p>
-        <a href="/">Logout</a>
+    <!-- <h2 id="user-info">Welcome, <span id="username"></span> (Email: <span id="emails"></span>)</h2> -->
+    <h2 id="user-info">Welcome, <span id="username"></span> (Email: <span id="emails"></span>)</h2>
+
+    <div id="main-page">
+        <button id="request-leave-btn">Request Leave</button>
+        <button onclick="window.location.href='/view-records'">View Records</button>
     </div>
+
+    <!-- Modal for Leave Request Form (Initially Hidden) -->
+    <div id="leave-request-modal">
+        <form id="leaveRequestForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="branch">Branch:</label>
+            <input type="text" id="branch" name="branch" required>
+
+            <label for="rollNumber">Roll Number:</label>
+            <input type="text" id="rollNumber" name="rollNumber" required>
+
+            <label for="phoneNumber">Phone Number:</label>
+            <input type="text" id="phoneNumber" name="phoneNumber" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="dateOfLeave">Date of Leave:</label>
+            <input type="date" id="dateOfLeave" name="dateOfLeave" required>
+
+            <label for="dateOfReturn">Date of Return:</label>
+            <input type="date" id="dateOfReturn" name="dateOfReturn" required>
+
+            <button type="button" onclick="submitForm()">Submit</button>
+            <button type="button" onclick="closeForm()">Close</button>
+        </form>
+    </div>
+
+    <script>
+        // Open the form modal
+        document.getElementById('request-leave-btn').onclick = function() {
+            document.getElementById('main-page').style.display = 'none';
+            document.getElementById('leave-request-modal').style.display = 'block';
+        };
+
+        // Close the form modal
+        function closeForm() {
+            document.getElementById('leave-request-modal').style.display = 'none';
+            window.location.href = '/student'; // Redirect to student page
+        }
+
+        // Submit form data
+        async function submitForm() {
+            const form = document.getElementById('leaveRequestForm');
+            const formData = {
+                name: form.name.value,
+                branch: form.branch.value,
+                rollNumber: form.rollNumber.value,
+                phoneNumber: form.phoneNumber.value,
+                email: form.email.value,
+                dateOfLeave: form.dateOfLeave.value,
+                dateOfReturn: form.dateOfReturn.value
+            };
+
+            try {
+                const response = await fetch('/api/leave-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Leave request submitted successfully.');
+                    window.location.href = '/student'; // Redirect to student page on success
+                } else {
+                    const result = await response.json();
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+            }
+        }
+    </script>
 </body>
 </html>
