@@ -17,18 +17,37 @@
             display: none;
             z-index: 1000;
         }
+
         #main-page {
             text-align: center;
             margin-top: 50px;
         }
+
+        /* Styles for records table */
+        #records-table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #records-table th, #records-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #records-table th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 <body>
-    <h2 id="user-info">Welcome, <span id="username"></span> (Roll Number: <span id="rollNumber"></span>)</h2> <!-- Updated span for roll number -->
+    <h2 id="user-info">Welcome, <span id="username"></span> (Roll Number: <span id="rollNumber"></span>)</h2>
 
     <div id="main-page">
         <button id="request-leave-btn">Request Leave</button>
-        <button onclick="window.location.href='/view-records'">View Records</button>
+        <button id="view-records-btn">View Records</button>
+        <button id="my-qr-btn">My QR</button> <!-- New button added -->
     </div>
 
     <!-- Modal for Leave Request Form (Initially Hidden) -->
@@ -55,58 +74,140 @@
             <label for="dateOfReturn">Date of Return:</label>
             <input type="date" id="dateOfReturn" name="dateOfReturn" required>
 
-            <button type="button" onclick="submitLeaveRequest()">Submit</button>
-            <button type="button" onclick="closeModal()">Cancel</button>
+            <button type="button" onclick="submitForm()">Submit</button>
+            <button type="button" onclick="closeForm()">Close</button>
         </form>
     </div>
 
+    <!-- Table for displaying leave requests -->
+    <div id="records-container" style="display: none;">
+        <h3>Your Leave Records</h3>
+        <table id="records-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll Number</th>
+                    <th>Branch</th>
+                    <th>Date of Leave</th>
+                    <th>Date of Return</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="records-body">
+                <!-- Records will be populated here -->
+            </tbody>
+        </table>
+        <button onclick="closeRecords()">Close Records</button>
+    </div>
+
     <script>
-        // Fetch session user data
-        fetch('/session-user')
-            .then(response => response.json())
-            .then(data => {
-                if (data) {
-                    document.getElementById('username').textContent = data.username;
-                    document.getElementById('rollNumber').textContent = data.rollNumber; // Show roll number
+        window.onload = async function() {
+            try {
+                const response = await fetch('/session-user');
+                const user = await response.json();
+
+                if (user) {
+                    document.getElementById('username').textContent = user.username;
+                    document.getElementById('rollNumber').textContent = user.rollNumber; // Display roll number
+                    document.getElementById('rollNumber').value = user.rollNumber; // Store roll number for later use
                 } else {
                     // Redirect to login if no user is found
-                    window.location.href = '/';
+                    window.location.href = '/login';
                 }
-            });
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                window.location.href = '/login'; // Redirect to login on error
+            }
+        };
 
-        // Show the leave request modal
-        document.getElementById('request-leave-btn').addEventListener('click', () => {
+        // Open the form modal
+        document.getElementById('request-leave-btn').onclick = function() {
+            document.getElementById('main-page').style.display = 'none';
             document.getElementById('leave-request-modal').style.display = 'block';
-        });
+        };
 
-        // Close the leave request modal
-        function closeModal() {
+        // Close the form modal
+        function closeForm() {
             document.getElementById('leave-request-modal').style.display = 'none';
+            window.location.href = '/student'; // Redirect to student page
         }
 
-        // Submit leave request
-        function submitLeaveRequest() {
+        // Open records view
+        document.getElementById('view-records-btn').onclick = async function() {
+            const rollNumber = document.getElementById('rollNumber').textContent;
+            const response = await fetch(`/api/leave-requests/${rollNumber}`);
+            const records = await response.json();
+        
+            const recordsBody = document.getElementById('records-body');
+            recordsBody.innerHTML = ''; // Clear previous records
+        
+            if (records.length > 0) {
+                records.forEach(record => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${record.name}</td>
+                        <td>${record.rollNumber}</td>
+                        <td>${record.branch}</td>
+                        <td>${record.dateOfLeave}</td>
+                        <td>${record.dateOfReturn}</td>
+                        <td>${record.status}</td>
+                    `;
+                    recordsBody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="6">No records found.</td>`;
+                recordsBody.appendChild(row);
+            }
+        
+            document.getElementById('records-container').style.display = 'block';
+            document.getElementById('main-page').style.display = 'none';
+        };
+        
+
+        // Close records view
+        function closeRecords() {
+            document.getElementById('records-container').style.display = 'none';
+            document.getElementById('main-page').style.display = 'block';
+        }
+
+        // Submit form data
+        async function submitForm() {
             const form = document.getElementById('leaveRequestForm');
-            const formData = new FormData(form);
-            const requestData = Object.fromEntries(formData.entries());
+            const formData = {
+                name: form.name.value,
+                branch: form.branch.value,
+                rollNumber: form.rollNumber.value,
+                phoneNumber: form.phoneNumber.value,
+                email: form.email.value,
+                dateOfLeave: form.dateOfLeave.value,
+                dateOfReturn: form.dateOfReturn.value
+            };
 
-            fetch('/api/leave-requests', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message); // Show success message
-                closeModal(); // Close the modal
-            })
-            .catch(error => {
-                console.error('Error submitting leave request:', error);
-                alert('Failed to submit leave request. Please try again.');
-            });
+            try {
+                const response = await fetch('/api/leave-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Leave request submitted successfully.');
+                    window.location.href = '/student'; // Redirect to student page on success
+                } else {
+                    const result = await response.json();
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+            }
         }
+
+        // Redirect to QR Code generator page
+        document.getElementById('my-qr-btn').onclick = function() {
+            const rollNumber = document.getElementById('rollNumber').textContent;
+            window.location.href = `/generateqr.html?rollNumber=${rollNumber}`;
+        };
     </script>
 </body>
 </html>
