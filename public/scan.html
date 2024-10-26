@@ -47,9 +47,12 @@
             let dst = new cv.Mat();
 
             cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+            cv.GaussianBlur(dst, dst, new cv.Size(5, 5), 0);
+            cv.threshold(dst, dst, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
             let qrCodeDetector = new cv.QRCodeDetector();
             let points = new cv.Mat();
             let decodedText = qrCodeDetector.detectAndDecode(dst, points);
+            console.log("Decoded QR code:", decodedText); // Log for debugging
 
             if (decodedText) {
                 qrText.innerText = `QR Code detected: ${decodedText}`; // Display decoded text
@@ -77,6 +80,3 @@
     </script>
 </body>
 </html>
-
-
-
