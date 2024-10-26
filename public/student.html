@@ -48,6 +48,7 @@
         <button id="request-leave-btn">Request Leave</button>
         <button id="view-records-btn">View Records</button>
         <button id="my-qr-btn">My QR</button> <!-- New button added -->
+        <button id="logout-btn">Logout</button> 
     </div>
 
     <!-- Modal for Leave Request Form (Initially Hidden) -->
@@ -202,6 +203,10 @@
                 console.error('Error submitting form:', error);
             }
         }
+
+        document.getElementById('logout-btn').onclick = function() {
+            // Redirect to the login page
+            window.location.href = '/login';}
 
         // Redirect to QR Code generator page
         document.getElementById('my-qr-btn').onclick = function() {
