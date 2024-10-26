@@ -60,9 +60,6 @@
             <label for="branch">Branch:</label>
             <input type="text" id="branch" name="branch" required>
 
-            <label for="rollNumber">Roll Number:</label>
-            <input type="text" id="rollNumber" name="rollNumber" required>
-
             <label for="phoneNumber">Phone Number:</label>
             <input type="text" id="phoneNumber" name="phoneNumber" required>
 
@@ -91,6 +88,7 @@
                     <th>Branch</th>
                     <th>Date of Leave</th>
                     <th>Date of Return</th>
+                    <th>Creation Date</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -151,6 +149,7 @@
                         <td>${record.branch}</td>
                         <td>${record.dateOfLeave}</td>
                         <td>${record.dateOfReturn}</td>
+                        <td>${new Date(record.createdAt).toLocaleString()}</td> <!-- Displaying the creation date and time -->
                         <td>${record.status}</td>
                     `;
                     recordsBody.appendChild(row);
@@ -173,36 +172,39 @@
         }
 
         // Submit form data
-        async function submitForm() {
-            const form = document.getElementById('leaveRequestForm');
-            const formData = {
-                name: form.name.value,
-                branch: form.branch.value,
-                rollNumber: form.rollNumber.value,
-                phoneNumber: form.phoneNumber.value,
-                email: form.email.value,
-                dateOfLeave: form.dateOfLeave.value,
-                dateOfReturn: form.dateOfReturn.value
-            };
+        // Submit form data
+async function submitForm() {
+    const form = document.getElementById('leaveRequestForm');
+    const rollNumber = document.getElementById('rollNumber').textContent; // Get roll number from session
 
-            try {
-                const response = await fetch('/api/leave-requests', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
+    const formData = {
+        name: form.name.value,
+        branch: form.branch.value,
+        rollNumber: rollNumber, // Use session roll number
+        phoneNumber: form.phoneNumber.value,
+        email: form.email.value,
+        dateOfLeave: form.dateOfLeave.value,
+        dateOfReturn: form.dateOfReturn.value
+    };
 
-                if (response.ok) {
-                    alert('Leave request submitted successfully.');
-                    window.location.href = '/student'; // Redirect to student page on success
-                } else {
-                    const result = await response.json();
-                    alert(`Error: ${result.message}`);
-                }
-            } catch (error) {
-                console.error('Error submitting form:', error);
-            }
+    try {
+        const response = await fetch('/api/leave-requests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            alert('Leave request submitted successfully.');
+            window.location.href = '/student'; // Redirect to student page on success
+        } else {
+            const result = await response.json();
+            alert(`Error: ${result.message}`);
         }
+    } catch (error) {
+        console.error('Error submitting form:', error);
+    }
+}
 
         document.getElementById('logout-btn').onclick = function() {
             // Redirect to the login page
