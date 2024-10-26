@@ -24,7 +24,7 @@
     </style>
 </head>
 <body>
-    <h2 id="user-info">Welcome, <span id="username"></span> (Email: <span id="emails"></span>)</h2>
+    <h2 id="user-info">Welcome, <span id="username"></span> (Roll Number: <span id="rollNumber"></span>)</h2> <!-- Updated span for roll number -->
 
     <div id="main-page">
         <button id="request-leave-btn">Request Leave</button>
@@ -55,72 +55,57 @@
             <label for="dateOfReturn">Date of Return:</label>
             <input type="date" id="dateOfReturn" name="dateOfReturn" required>
 
-            <button type="button" onclick="submitForm()">Submit</button>
-            <button type="button" onclick="closeForm()">Close</button>
+            <button type="button" onclick="submitLeaveRequest()">Submit</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
         </form>
     </div>
 
     <script>
-        window.onload = async function() {
-            try {
-                const response = await fetch('/session-user');
-                const user = await response.json();
-
-                if (user) {
-                    document.getElementById('username').textContent = user.username;
-                    document.getElementById('emails').textContent = user.email;
+        // Fetch session user data
+        fetch('/session-user')
+            .then(response => response.json())
+            .then(data => {
+                if (data) {
+                    document.getElementById('username').textContent = data.username;
+                    document.getElementById('rollNumber').textContent = data.rollNumber; // Show roll number
                 } else {
                     // Redirect to login if no user is found
-                    window.location.href = '/login';
+                    window.location.href = '/';
                 }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                window.location.href = '/login'; // Redirect to login on error
-            }
-        };
+            });
 
-        // Open the form modal
-        document.getElementById('request-leave-btn').onclick = function() {
-            document.getElementById('main-page').style.display = 'none';
+        // Show the leave request modal
+        document.getElementById('request-leave-btn').addEventListener('click', () => {
             document.getElementById('leave-request-modal').style.display = 'block';
-        };
+        });
 
-        // Close the form modal
-        function closeForm() {
+        // Close the leave request modal
+        function closeModal() {
             document.getElementById('leave-request-modal').style.display = 'none';
-            window.location.href = '/student'; // Redirect to student page
         }
 
-        // Submit form data
-        async function submitForm() {
+        // Submit leave request
+        function submitLeaveRequest() {
             const form = document.getElementById('leaveRequestForm');
-            const formData = {
-                name: form.name.value,
-                branch: form.branch.value,
-                rollNumber: form.rollNumber.value,
-                phoneNumber: form.phoneNumber.value,
-                email: form.email.value,
-                dateOfLeave: form.dateOfLeave.value,
-                dateOfReturn: form.dateOfReturn.value
-            };
+            const formData = new FormData(form);
+            const requestData = Object.fromEntries(formData.entries());
 
-            try {
-                const response = await fetch('/api/leave-requests', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-
-                if (response.ok) {
-                    alert('Leave request submitted successfully.');
-                    window.location.href = '/student'; // Redirect to student page on success
-                } else {
-                    const result = await response.json();
-                    alert(`Error: ${result.message}`);
-                }
-            } catch (error) {
-                console.error('Error submitting form:', error);
-            }
+            fetch('/api/leave-requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Show success message
+                closeModal(); // Close the modal
+            })
+            .catch(error => {
+                console.error('Error submitting leave request:', error);
+                alert('Failed to submit leave request. Please try again.');
+            });
         }
     </script>
 </body>
