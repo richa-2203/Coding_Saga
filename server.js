@@ -96,7 +96,9 @@ app.get('/api/leave-requests/:rollNumber', (req, res) => {
 
     res.json(filteredRequests);
 });
-
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html')); // Adjust this path to where your login.html is located
+});
 
 // API to create a leave request and save to JSON file
 app.post('/api/leave-requests', (req, res) => {
@@ -133,14 +135,6 @@ const loadLeaveRequests = () => {
     }
 };
 
-const saveLeaveRequests = (requests) => {
-    try {
-        fs.writeFileSync('leaveRequests.json', JSON.stringify(requests, null, 2), 'utf8');
-        console.log('leaveRequests.json updated successfully.');
-    } catch (error) {
-        console.error('Error writing to leaveRequests.json:', error);
-    }
-};
 app.get('/api/leaveRequests', (req, res) => {
     const filePath = path.join(__dirname, 'leaveRequests.json');
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -189,6 +183,15 @@ app.post('/api/update-status', (req, res) => {
     });
 });
 
+
+const saveLeaveRequests = (requests) => {
+    try {
+        fs.writeFileSync('leaveRequests.json', JSON.stringify(requests, null, 2), 'utf8');
+        console.log('leaveRequests.json updated successfully.');
+    } catch (error) {
+        console.error('Error writing to leaveRequests.json:', error);
+    }
+};
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
