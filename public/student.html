@@ -47,7 +47,7 @@
     <div id="main-page">
         <button id="request-leave-btn">Request Leave</button>
         <button id="view-records-btn">View Records</button>
-        <button id="my-qr-btn">My QR</button> <!-- New button added -->
+        <button id="my-qr-btn">My QR</button>
         <button id="logout-btn">Logout</button> 
     </div>
 
@@ -108,7 +108,6 @@
                 if (user) {
                     document.getElementById('username').textContent = user.username;
                     document.getElementById('rollNumber').textContent = user.rollNumber; // Display roll number
-                    document.getElementById('rollNumber').value = user.rollNumber; // Store roll number for later use
                 } else {
                     // Redirect to login if no user is found
                     window.location.href = '/login';
@@ -136,76 +135,60 @@
             const rollNumber = document.getElementById('rollNumber').textContent;
             const response = await fetch(`/api/leave-requests/${rollNumber}`);
             const records = await response.json();
-        
-            const recordsBody = document.getElementById('records-body');
-            recordsBody.innerHTML = ''; // Clear previous records
-        
-            if (records.length > 0) {
-                records.forEach(record => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${record.name}</td>
-                        <td>${record.rollNumber}</td>
-                        <td>${record.branch}</td>
-                        <td>${record.dateOfLeave}</td>
-                        <td>${record.dateOfReturn}</td>
-                        <td>${new Date(record.createdAt).toLocaleString()}</td> <!-- Displaying the creation date and time -->
-                        <td>${record.status}</td>
-                    `;
-                    recordsBody.appendChild(row);
-                });
-            } else {
-                const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="6">No records found.</td>`;
-                recordsBody.appendChild(row);
-            }
-        
-            document.getElementById('records-container').style.display = 'block';
-            document.getElementById('main-page').style.display = 'none';
+            displayRecords(records);
         };
-        
 
-        // Close records view
+        // Display leave records in a table
+        function displayRecords(records) {
+            const recordsBody = document.getElementById('records-body');
+            recordsBody.innerHTML = ''; // Clear previous entries
+
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.name}</td>
+                    <td>${record.rollNumber}</td>
+                    <td>${record.branch}</td>
+                    <td>${record.dateOfLeave}</td>
+                    <td>${record.dateOfReturn}</td>
+                    <td>${new Date(record.createdAt).toLocaleString()}</td> <!-- Format the date -->
+                    <td>${record.status}</td>
+                `;
+                recordsBody.appendChild(row);
+            });
+
+            document.getElementById('records-container').style.display = 'block'; // Show the records table
+        }
+
+        // Close the records view
         function closeRecords() {
-            document.getElementById('records-container').style.display = 'none';
-            document.getElementById('main-page').style.display = 'block';
+            document.getElementById('records-container').style.display = 'none'; // Hide records
+            document.getElementById('main-page').style.display = 'block'; // Show main page again
         }
 
-        // Submit form data
-        // Submit form data
-async function submitForm() {
-    const form = document.getElementById('leaveRequestForm');
-    const rollNumber = document.getElementById('rollNumber').textContent; // Get roll number from session
+        // Submit leave request form
+        async function submitForm() {
+            const formData = new FormData(document.getElementById('leaveRequestForm'));
+            const data = Object.fromEntries(formData.entries());
 
-    const formData = {
-        name: form.name.value,
-        branch: form.branch.value,
-        rollNumber: rollNumber, // Use session roll number
-        phoneNumber: form.phoneNumber.value,
-        email: form.email.value,
-        dateOfLeave: form.dateOfLeave.value,
-        dateOfReturn: form.dateOfReturn.value
-    };
+            try {
+                const response = await fetch('/api/leave-requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
 
-    try {
-        const response = await fetch('/api/leave-requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
 
-        if (response.ok) {
-            alert('Leave request submitted successfully.');
-            window.location.href = '/student'; // Redirect to student page on success
-        } else {
-            const result = await response.json();
-            alert(`Error: ${result.message}`);
+                alert('Leave request submitted successfully!');
+                closeForm(); // Close the form modal
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                alert('Error submitting request: ' + error.message);
+            }
         }
-    } catch (error) {
-        console.error('Error submitting form:', error);
-    }
-}
-
         document.getElementById('logout-btn').onclick = function() {
             // Redirect to the login page
             window.location.href = '/login';}
