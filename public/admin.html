@@ -4,22 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Page</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-    <div class="page-container">
-        <h2>Welcome to the Admin Page</h2>
-        <h1>Pending Requests</h1>
+    <div class="header">
+        <h1>Welcome to the Admin Page</h1>
+        <button id="logout-btn">Logout</button>
+    </div>
+    <div id="req">
+    <h2>Pending Requests</h2>
     </div>
     <table id="dataTable">
         <thead>
             <tr>
-                <th>ROLLNO</th>
+                <th>Roll Number</th>
                 <th>Name</th>
                 <th>Branch</th>
                 <th>Date of Leave</th>
                 <th>Date of Return</th>
-                <th>Creation Date</th> <!-- New column for Creation Date -->
+                <th>Request Time</th> <!-- New column for Creation Date -->
                 <th>Actions</th> <!-- Column for approve/decline actions -->
             </tr>
         </thead>
@@ -27,7 +30,6 @@
             <!-- Data will be populated here -->
         </tbody>
     </table>
-    
 
     <script>
         async function fetchData() {
@@ -53,7 +55,7 @@
             if (pendingRequests.length === 0) {
                 const messageRow = document.createElement('tr');
                 messageRow.innerHTML = `
-                    <td colspan="5" style="text-align: center;">No requests pending.</td>
+                    <td colspan="7" style="text-align: center;">No requests pending.</td>
                 `;
                 tableBody.appendChild(messageRow);
             } else {
@@ -96,9 +98,13 @@
                 alert('Error updating status: ' + error.message);
             }
         }
-    fetchData(); // Call fetchData on page load
+        
+        fetchData(); // Call fetchData on page load
+        
+        document.getElementById('logout-btn').onclick = function() {
+            // Redirect to the login page
+            window.location.href = '/login';
+        }
     </script>
-        <a href="/">Logout</a>
-   
 </body>
 </html>
