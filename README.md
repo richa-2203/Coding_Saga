@@ -58,6 +58,11 @@ Many educational institutions, including our own, struggle with managing student
 - K S Prakruthi (Frontend)
 - Maitreyee Kumbhojkar (Frontend and Backend) 
 
+## References
+- https://github.com/bradtraversy/qr-code-generator
+- LLMs
+- https://youtu.be/SrZuwM705yE?si=_RLNOgS77Le4X1Vj
+
 ## Project Flow Structure 
 
 ```plaintext
