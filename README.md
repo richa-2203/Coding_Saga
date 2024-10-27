@@ -7,7 +7,7 @@
 - [Technologies Used](#technologies-used)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
+- [Contributors](#contributing)
 
 ## Problem Statement
 Many educational institutions, including our own, struggle with managing student leave requests and approvals efficiently. The reliance on paper-based systems leads to delays, confusion, and unnecessary trips between students and wardens. Our solution digitizes this process, allowing students to submit leave requests and get approvals with a single click. This system streamlines communication between students, admins, and security personnel, enhancing overall campus security and efficiency.
