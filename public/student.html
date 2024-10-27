@@ -168,8 +168,16 @@
 
         // Submit leave request form
         async function submitForm() {
-            const formData = new FormData(document.getElementById('leaveRequestForm'));
+            const form = document.getElementById('leaveRequestForm');
+            const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
+
+            // Check for empty fields
+            const isFormValid = Object.values(data).every(value => value.trim() !== '');
+            if (!isFormValid) {
+                alert('Please fill in all fields before submitting.');
+                return;
+            }
 
             try {
                 const response = await fetch('/api/leave-requests', {
@@ -178,17 +186,17 @@
                     body: JSON.stringify(data),
                 });
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                alert('Leave request submitted successfully!');
-                closeForm(); // Close the form modal
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                alert('Error submitting request: ' + error.message);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+
+            alert('Leave request submitted successfully!');
+            closeForm(); // Close the form modal
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            alert('Error submitting request: ' + error.message);
         }
+    }
         document.getElementById('logout-btn').onclick = function() {
             // Redirect to the login page
             window.location.href = '/login';}
