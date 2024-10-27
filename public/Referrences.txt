@@ -1,1 +1,2 @@
 1. For QR Code Genrator: https://github.com/bradtraversy/qr-code-generator
+2. LLMs
