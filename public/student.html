@@ -99,15 +99,18 @@
         <button onclick="closeRecords()">Close Records</button>
     </div>
 
-    <script>
+   <script>
+        document.getElementById('request-leave-btn').onclick = function() {
+            window.location.href = 'leave-request.html'; // Redirect to the leave request page
+        };
         window.onload = async function() {
             try {
                 const response = await fetch('/session-user');
                 const user = await response.json();
 
                 if (user) {
-                    document.getElementById('username').textContent = user.username;
-                    document.getElementById('rollNumber').textContent = user.rollNumber; // Display roll number
+                    document.getElementById('student-username').textContent = user.username;
+                    document.getElementById('student-roll-number').textContent = user.rollNumber; // Display roll number
                 } else {
                     // Redirect to login if no user is found
                     window.location.href = '/login';
@@ -118,31 +121,32 @@
             }
         };
 
-        // Open the form modal
-        document.getElementById('request-leave-btn').onclick = function() {
-            document.getElementById('main-page').style.display = 'none';
-            document.getElementById('leave-request-modal').style.display = 'block';
-        };
+       // Open the form modal
+document.getElementById('request-leave-btn').onclick = function() {
+    document.getElementById('main-page').style.display = 'none';
+    document.getElementById('leave-request-modal').style.display = 'block';
+};
 
         // Close the form modal
-        function closeForm() {
+        function closeLeaveRequestForm() {
             document.getElementById('leave-request-modal').style.display = 'none';
             window.location.href = '/student'; // Redirect to student page
         }
 
-        // Open records view
-        document.getElementById('view-records-btn').onclick = async function() {
-            const rollNumber = document.getElementById('rollNumber').textContent;
-            const response = await fetch(`/api/leave-requests/${rollNumber}`);
-            const records = await response.json();
-            displayRecords(records);
-        };
-
+       // Open records view
+document.getElementById('view-leave-records-btn').onclick = async function() {
+    document.getElementById('main-page').style.display = 'none'; // Hide main page
+    const rollNumber = document.getElementById('student-roll-number').textContent;
+    const response = await fetch(`/api/leave-requests/${rollNumber}`);
+    const records = await response.json();
+    displayLeaveRecords(records);
+};
+    
         // Display leave records in a table
-        function displayRecords(records) {
-            const recordsBody = document.getElementById('records-body');
+        function displayLeaveRecords(records) {
+            const recordsBody = document.getElementById('leave-records-body');
             recordsBody.innerHTML = ''; // Clear previous entries
-
+    
             records.forEach(record => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -151,61 +155,88 @@
                     <td>${record.branch}</td>
                     <td>${record.dateOfLeave}</td>
                     <td>${record.dateOfReturn}</td>
-                    <td>${new Date(record.createdAt).toLocaleString()}</td> <!-- Format the date -->
+                    <td>${new Date(record.createdAt).toLocaleString()}</td>
                     <td>${record.status}</td>
                 `;
                 recordsBody.appendChild(row);
             });
-
-            document.getElementById('records-container').style.display = 'block'; // Show the records table
+    
+            document.getElementById('leave-records-container').style.display = 'block'; // Show the records table
         }
 
-        // Close the records view
-        function closeRecords() {
-            document.getElementById('records-container').style.display = 'none'; // Hide records
+        // Open JSON records view
+        document.getElementById('view-all-leave-records-btn').onclick = async function() {
+            document.getElementById('main-page').style.display = 'none'; // Hide main page
+            const response = await fetch('/record');
+            const records = await response.json();
+            displayAllRecords(records);
+        };
+    
+        // Display all records from records.json
+        function displayAllRecords(records) {
+            const jsonRecordsBody = document.getElementById('json-records-body'); // Reusing same table body element
+            jsonRecordsBody.innerHTML = ''; // Clear previous entries
+    
+            records.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.rollNumber}</td>
+                    <td>${new Date(record.inTime).toLocaleTimeString()}</td>
+                    <td>${new Date(record.inDate).toLocaleDateString()}</td>
+                    <td>${new Date(record.outTime).toLocaleTimeString()}</td>
+                    <td>${new Date(record.outDate).toLocaleDateString()}</td>
+                `;
+                jsonRecordsBody.appendChild(row);
+            });
+    
+            document.getElementById('json-records-container').style.display = 'block'; // Show the JSON records table
+        }
+
+        // Close the leave records view
+        function closeLeaveRecords() {
+            document.getElementById('leave-records-container').style.display = 'none';
+            document.getElementById('main-page').style.display = 'block'; // Show main page again
+        }
+        // Close the JSON records view
+        function closeJsonRecords() {
+            document.getElementById('json-records-container').style.display = 'none';
             document.getElementById('main-page').style.display = 'block'; // Show main page again
         }
 
         // Submit leave request form
-        async function submitForm() {
-            const form = document.getElementById('leaveRequestForm');
-            const formData = new FormData(form);
+        async function submitLeaveRequest() {
+            const formData = new FormData(document.getElementById('leave-request-form'));
             const data = Object.fromEntries(formData.entries());
 
-            // Check for empty fields
-            const isFormValid = Object.values(data).every(value => value.trim() !== '');
-            if (!isFormValid) {
-                alert('Please fill in all fields before submitting.');
-                return;
+            const response = await fetch('/api/leave-requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('Leave request submitted successfully!');
+                closeLeaveRequestForm(); // Close the form after submission
+            } else {
+                alert('Error submitting leave request. Please try again.');
             }
-
-            try {
-                const response = await fetch('/api/leave-requests', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            alert('Leave request submitted successfully!');
-            closeForm(); // Close the form modal
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            alert('Error submitting request: ' + error.message);
         }
-    }
-        document.getElementById('logout-btn').onclick = function() {
-            // Redirect to the login page
-            window.location.href = '/login';}
 
-        // Redirect to QR Code generator page
-        document.getElementById('my-qr-btn').onclick = function() {
-            const rollNumber = document.getElementById('rollNumber').textContent;
-            window.location.href = `/generateqr.html?rollNumber=${rollNumber}`;
+        // Logout function
+        document.getElementById('logout-btn').onclick = async function() {
+            await fetch('/logout', { method: 'POST' });
+            window.location.href = '/login'; // Redirect to login after logout
         };
+
+        // Display QR code (add your QR code functionality here)
+        // Display QR code
+document.getElementById('my-qr-btn').onclick = function() {
+    const rollNumber = document.getElementById('student-roll-number').textContent; // Corrected ID
+    window.location.href = `/generateqr.html?rollNumber=${rollNumber}`; // Ensure this URL points to the QR generation page
+};
+
     </script>
 </body>
 </html>
