@@ -72,17 +72,31 @@
             // Clear any previous results
             resultsContainer.innerHTML = '';
 
+            // Define the keys you want to display
+            const keysToDisplay = ['rollNumber', 'inTime', 'outTime']; // Modify this array with the desired keys
+
+            // Mapping of keys to display text
+            const labelMapping = {
+                rollNumber: 'Roll Number',
+                inTime: 'Out Date and Time',
+                outTime:'In Date and Time'
+
+            };
+
             // Display the results
             if (results.length > 0) {
                 results.forEach(result => {
                     const card = document.createElement('div');
                     card.className = 'result-card';
 
-                    // Add key-value pairs from the result object
-                    for (const [key, value] of Object.entries(result)) {
-                        const detail = document.createElement('p');
-                        detail.textContent = `${key}: ${value !== null ? value : 'N/A'}`; // Show 'N/A' for null values
-                        card.appendChild(detail);
+                    // Add only specified key-value pairs from the result object
+                    for (const key of keysToDisplay) {
+                        if (result.hasOwnProperty(key)) {
+                            const detail = document.createElement('p');
+                            const displayLabel = labelMapping[key] || key; // Use the mapping, or fall back to the key itself
+                            detail.textContent = `${displayLabel} = ${result[key] !== null ? result[key] : 'N/A'}`; // Show 'N/A' for null values
+                            card.appendChild(detail);
+                        }
                     }
 
                     resultsContainer.appendChild(card);
