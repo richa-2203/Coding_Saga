@@ -49,10 +49,35 @@ Many educational institutions, including our own, struggle with managing student
 -Admins can manage leave requests and approve or deny submissions.
 -Security personnel can scan students’ QR codes to verify their leave status at campus entry and exit points.
 
+
+##Project Flow Structure 
+
+```plaintext
+.
+├── public/
+│   ├── admin.css
+│   ├── admin.html
+│   ├── generateqr.html
+│   ├── login.html
+│   ├── result1.html
+│   ├── result2.html
+│   ├── scan.html
+│   ├── security.css
+│   ├── security.html
+│   ├── student.html
+│   ├── studentstyle.css
+│   ├── style.css
+│   └── styleqr.css
+├── leaveRequests.json
+├── package-lock.json
+├── package.json
+├── records.json
+├── report.txt
+├── server.js
+└── users.json
+
 ## Contributors
 - Moolinti Vaishnavi Reddy
 - Richa Rajashekhar
 - Maitreyee Kumbhojkar
 - K S Prakruthi
-
-##
