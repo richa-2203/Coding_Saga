@@ -1,0 +1,30 @@
+[
+  {
+    "rollNumber": "ee23bt017",
+    "inTime": "10/27/2024, 12:22:10 PM",
+    "inDate": "2024-10-27",
+    "outTime": "10/27/2024, 12:22:24 PM",
+    "outDate": "2024-10-27"
+  },
+  {
+    "rollNumber": "ee23bt017",
+    "inTime": "10/27/2024, 12:22:37 PM",
+    "inDate": "2024-10-27",
+    "outTime": null,
+    "outDate": null
+  },
+  {
+    "rollNumber": "cs23bt060",
+    "inTime": "10/27/2024, 12:23:15 PM",
+    "inDate": "2024-10-27",
+    "outTime": "10/27/2024, 12:23:48 PM",
+    "outDate": "2024-10-27"
+  },
+  {
+    "rollNumber": "cs23bt020",
+    "inTime": "10/27/2024, 12:23:25 PM",
+    "inDate": "2024-10-27",
+    "outTime": null,
+    "outDate": null
+  }
+]
