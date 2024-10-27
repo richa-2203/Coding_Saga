@@ -47,10 +47,10 @@ Many educational institutions, including our own, struggle with managing student
    git clone https://github.com/richa-2203/Coding_saga.git
 
 ## Usage
--**Access the application at http://localhost:3000 in your web browser.**
--**Students can log in to submit leave requests and view their approval status.**
--**Admins can manage leave requests and approve or deny submissions.**
--**Security personnel can scan students’ QR codes to verify their leave status at campus entry and exit points.**
+- **Access the application at http://localhost:3000 in your web browser.**
+- **Students can log in to submit leave requests and view their approval status.**
+- **Admins can manage leave requests and approve or deny submissions.**
+- **Security personnel can scan students’ QR codes to verify their leave status at campus entry and exit points.**
 
 ## Contributors
 - Moonlinti Vaishnavi Reddy (Team Leader and Backend)
