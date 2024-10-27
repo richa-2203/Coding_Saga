@@ -19,7 +19,7 @@
     <h1>QR Code Scanner</h1>
     <video id="video" autoplay></video>
     <canvas id="canvas"></canvas>
-    <div id="qrText" style="margin-top: 20px; font-size: 1.2em; color: blue;"></div> <!-- Display QR code text here -->
+    <div id="qrText" style="margin-top: 20px; font-size: 1.2em; color: hwb(229 11% 43% / 0.041);"></div> <!-- Display QR code text here -->
     
     <script>
         let video = document.getElementById('video');
@@ -40,7 +40,6 @@
         }
 
         function scanQRCode() {
-            // Capture the frame from the video
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
             let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
             let src = cv.matFromImageData(imgData);
@@ -52,11 +51,12 @@
             let qrCodeDetector = new cv.QRCodeDetector();
             let points = new cv.Mat();
             let decodedText = qrCodeDetector.detectAndDecode(dst, points);
-            console.log("Decoded QR code:", decodedText); // Log for debugging
+            //console.log("Student ID:", decodedText); // Log for debugging
 
             if (decodedText) {
                 qrText.innerText = `QR Code detected: ${decodedText}`; // Display decoded text
                 console.log("QR Code detected:", decodedText); // Log decoded text
+                searchRollNumber(decodedText); // Call the function to search for the roll number
             } else {
                 console.log("No QR code detected in this frame."); 
             }
@@ -64,6 +64,26 @@
             src.delete();
             dst.delete();
             points.delete();
+        }
+
+        async function searchRollNumber(decodedText) {
+            try {
+                const response = await fetch('/LeaveRequests.json'); // Adjust path
+                const leaveRequests = await response.json();
+                
+                console.log("leave requests:",leaveRequests);
+
+                const result = leaveRequests.find(request => request.rollNumber === decodedText);
+                
+                if (result) {
+                    // Display the leave request status
+                    alert(`Leave request found for roll number ${decodedText}: Status is ${result.status}`);
+                } else {
+                    alert(`No leave request found for roll number ${decodedText}`);
+                }
+            } catch (error) {
+                console.error("Error fetching leave requests:", error);
+            }
         }
 
         async function main() {
