@@ -8,7 +8,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributors](#contributors)
-- [Referrences](#referrences)
+- [References](#referrences)
 - [Project Flow Structure](#project-flow-structure)
 
 ## Problem Statement
