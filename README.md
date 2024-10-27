@@ -12,7 +12,7 @@
 ## Problem Statement
 Many educational institutions, including our own, struggle with managing student leave requests and approvals efficiently. The reliance on paper-based systems leads to delays, confusion, and unnecessary trips between students and wardens. Our solution digitizes this process, allowing students to submit leave requests and get approvals with a single click. This system streamlines communication between students, admins, and security personnel, enhancing overall campus security and efficiency.
 
-#### Challenges Faced
+## Challenges Faced
 - **Data Security and Privacy**: Ensuring the protection of sensitive student information against unauthorized access and data breaches.
 - **Real-Time Data Syncing**: Achieving seamless real-time updates across the system, especially during high volumes of leave requests.
 - **Reliable QR Code Scanning**: Ensuring quick and accurate QR code scanning under varying conditions.
