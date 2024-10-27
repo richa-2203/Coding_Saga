@@ -50,7 +50,7 @@ Many educational institutions, including our own, struggle with managing student
 -Security personnel can scan students’ QR codes to verify their leave status at campus entry and exit points.
 
 
-##Project Flow Structure 
+## Project Flow Structure 
 
 ```plaintext
 .
