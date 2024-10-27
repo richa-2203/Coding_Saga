@@ -4,13 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Page</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="security.css">
+    <script src="https://docs.opencv.org/4.x/opencv.js" async></script>
+    <style>
+        video {
+            width: 320px;
+            height: auto;
+        }
+        canvas {
+            display: none; /* Hide the canvas for processing */
+        }
+        #scanSection {
+            display: none; /* Initially hidden */
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="page-container">
-        <h2>Welcome to the Security Page</h2>
-        <p>This page is for security staff only.</p>
-        <a href="/">Logout</a>
+    <div class="top-bar">
+        <h2 class="welcome-text">Welcome to the Security Page</h2>
+        <a href="/" class="logout-btn">Logout</a>
     </div>
+
+    <div class="content">
+        <h2 class="scan-heading">Choose an Option</h2>
+        <div class="button-container">
+            <button onclick="window.location.href='results1.html'">Outing Requests</button>
+            <button onclick="window.location.href='results2.html'">Student Time Data</button>
+            <button onclick="showScanSection()">Scan QR Code</button>
+        </div>
+
+        <!-- QR Code Scan Section -->
+        <div id="scanSection">
+            <h2>QR Code Scanner</h2>
+            <video id="video" autoplay></video>
+            <canvas id="canvas"></canvas>
+            <div id="qrText" style="margin-top: 20px; font-size: 1.2em; color: #000;"></div> <!-- Display QR code text here -->
+            <button onclick="closeScanSection()">Close QR</button> <!-- Close QR Button -->
+        </div>
+    </div>
+
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let context = canvas.getContext('2d');
+        let qrText = document.getElementById('qrText');
+
+        function showScanSection() {
+            const scanSection = document.getElementById('scanSection');
+            scanSection.style.display = 'block'; // Show the QR scan section
+            startCamera();
+        }
+
+        function closeScanSection() {
+            const scanSection = document.getElementById('scanSection');
+            scanSection.style.display = 'none'; // Hide the QR scan section
+            stopCamera(); // Stop the camera when closing
+        }
+
+        async function startCamera() {
+            try {
+                let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.setAttribute('playsinline', true);
+                video.play();
+            } catch (error) {
+                console.error("Error accessing the camera:", error);
+                alert("Could not access the camera. Please check your permissions.");
+            }
+        }
+
+        function stopCamera() {
+            let stream = video.srcObject;
+            if (stream) {
+                let tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+            video.srcObject = null; // Clear the video source
+        }
+
+        async function searchRollNumber(decodedText) {
+            try {
+                const response = await fetch('/records.json'); // Fetch records
+                const records = await response.json();
+        
+                const currentTime = new Date();
+                const formattedDateTime = currentTime.toLocaleString(); // Customize if needed
+                const inDate = currentTime.toISOString().split('T')[0]; // YYYY-MM-DD
+                const inTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+                const record = records.find(r => r.rollNumber === decodedText);
+        
+                if (record) {
+                    // If inTime is filled and outTime is empty, update outTime
+                    if (record.inTime && !record.outTime) {
+                        record.outTime = formattedDateTime;
+                       record.outDate = inDate; // Record out date
+                        alert(`Out time recorded for roll number ${decodedText} at ${formattedDateTime}`);
+                    } 
+                    // If outTime is filled, create a new record with inTime
+                    else if (record.inTime && record.outTime) {
+                        // Create a new record with the current inTime
+                        records.push({
+                            rollNumber: decodedText,
+                            inTime: formattedDateTime,
+                            inDate: inDate,
+                            outTime: null,
+                            outDate: null // Initialize outDate as null
+                        });
+                        alert(`New record created for roll number ${decodedText} with in time at ${formattedDateTime}`);
+                    } else {
+                        alert(`Roll number ${decodedText} has already checked in.`);
+                    }
+                } else {
+                    // If the record does not exist, create a new one
+                    records.push({
+                        rollNumber: decodedText,
+                        inTime: formattedDateTime,
+                        inDate: inDate,
+                        outTime: null, // Initialize outTime as null
+                       outDate: null  // Initialize outDate as null
+                    });
+                    alert(`New record created for roll number ${decodedText} with in time at ${formattedDateTime}`);
+                }
+        
+                // Save updated records back to records.json
+                await saveRecords(records);
+            } catch (error) {
+                console.error("Error fetching or updating records:", error);
+            }
+        }
+        // Function to save records back to records.json
+        async function saveRecords(records) {
+            try {
+                const response = await fetch('/saveRecords', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(records)
+                });
+        
+                if (response.ok) {
+                    console.log("Records saved successfully.");
+                } else {
+                    const errorText = await response.text();
+                    console.error("Failed to save records:", errorText);
+                }
+            } catch (error) {
+                console.error("Error saving records:", error);
+            }
+        }
+        
+        // Example of integrating the scanQRCode function
+        function scanQRCode() {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+            let src = cv.matFromImageData(imgData);
+            let dst = new cv.Mat();
+        
+            cv.cvtColor(src, dst, cv.COLOR_RGBA2GRAY);
+            cv.GaussianBlur(dst, dst, new cv.Size(5, 5), 0);
+            cv.threshold(dst, dst, 0, 255, cv.THRESH_BINARY | cv.THRESH_OTSU);
+            let qrCodeDetector = new cv.QRCodeDetector();
+            let points = new cv.Mat();
+            let decodedText = qrCodeDetector.detectAndDecode(dst, points);
+        
+            if (decodedText) {
+                qrText.innerText = `QR Code detected: ${decodedText}`;
+                searchRollNumber(decodedText); // Call to update records
+            }
+        
+            src.delete();
+            dst.delete();
+            points.delete();
+        }
+        
+
+        async function main() {
+            video.addEventListener('loadedmetadata', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            });
+            setInterval(scanQRCode, 1000); // Scan every second
+        }
+
+        main();
+    </script>
 </body>
 </html>
