@@ -40,7 +40,7 @@ Many educational institutions, including our own, struggle with managing student
   - GitHub for version control and collaboration
  
  ## Installation
-1. Install Node.js, express.js and dependencies
+1. Install Node.js, express.js, node-modules and dependencies
    ```bash
    npm install
 2. Clone the repository:
