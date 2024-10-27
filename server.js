@@ -152,7 +152,60 @@ app.get('/api/leaveRequests', (req, res) => {
     });
 });
 
+// Serve records.json for reading
+// app.get('/records.json', (req, res) => {
+//     fs.readFile(path.join(__dirname, 'data', 'records.json'), 'utf8', (err, data) => {
+//         if (err) {
+//             return res.status(500).send('Error reading records.json');
+//         }
+//         res.json(JSON.parse(data));
+//     });
+// });
+
+// Endpoint to save records
+app.post('/saveRecords', (req, res) => {
+    const records = req.body;
+    const recordsPath = path.join(__dirname, 'records.json'); // Adjust the path as necessary
+
+    // Save the updated records to records.json
+    fs.writeFile(recordsPath, JSON.stringify(records, null, 2), (err) => {
+        if (err) {
+            console.error("Error saving records:", err);
+            return res.status(500).send('Error saving records');
+        }
+        res.send('Records saved successfully');
+    });
+});
+
+// app.get('/records.json', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'path/to/records.json')); // Update the path as necessary
+// });
+
+
+
+app.get('/data', (req, res) => {
+    res.sendFile(path.join(__dirname, 'leaveRequests.json'));
+});
+
+app.get('/record', (req, res) => {
+    const filePath = path.join(__dirname, 'records.json'); // Adjust the path as necessary
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading the JSON file:', err);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+        try {
+            const jsonData = JSON.parse(data); // Parse the JSON data
+            res.json(jsonData); // Send JSON data as response
+        } catch (parseError) {
+            console.error('Error parsing JSON data:', parseError);
+            res.status(500).json({ error: 'Error parsing JSON data' });
+        }
+    });
+});
+
 const leaveRequestsFilePath = path.join(__dirname, 'leaveRequests.json');
+//const recordsFilePath = path.join(__dirname, 'records.json');
 
 // Endpoint to update the status of a leave request
 // Endpoint to update the status of a leave request
