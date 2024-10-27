@@ -1,8 +1,0 @@
-1. Tech used:
-   A. Frontend: CSS and HTML. 
-   B. Backend development: Node.js and Express.js
-   C. Qr code generation and scanning: OpenCv.js and Zxing 
-   D. 
-A] CSS and HTML: HTML provided structure of the webpage defining the applications layout and user interface. CSS provided the visual layout of HTML elements making it visually appealing and user-friendly.
-B] node.js and express.js : these two helped in simplifying routes and for the application, asynchronous programming, using JavaScript throughout the application. 
-c] Opencv.js and Zxing: opencv.js helps wich helped in qr code genration on logging in with student id. the application scans the qr code on the security side with Zxing(Zebra Crossing ) and decodes the same. 
